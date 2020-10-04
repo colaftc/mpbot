@@ -70,5 +70,12 @@ async def reply_handler(
     xml_body = await request.body()
     decrypted = crypto.decrypt_message(xml_body.decode(), msg_signature, timestamp, nonce)
     msg = parse_message(decrypted)
-    print(msg)
-    return {'msg' : 'testing'}
+
+    if msg.type == 'text':
+        result = '收到文字消息'
+    elif msg.type == 'image':
+        result = '收到图片消息'
+    else:
+        result = '收到不支持的消息'
+
+    return result
