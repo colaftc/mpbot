@@ -61,7 +61,7 @@ async def wx_verify(
     print([signature, nonce, timestamp, echostr])
     return echostr
 
-@app.post('/', response_class=Xml)
+@app.post('/')
 async def reply_handler(
     msg_signature : str,
     timestamp : str,
