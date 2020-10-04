@@ -75,7 +75,7 @@ class MsgDispatcher:
     def __init__(self, loader : BaseReplyLoader):
         self._loader = loader
 
-    def dispatch(msg):
+    def dispatch(self, msg):
         if msg.type == 'text':
             return self._loader.answer(msg.content)
         else:
@@ -110,7 +110,7 @@ async def reply_handler(
     decrypted = crypto.decrypt_message(xml_body.decode(), msg_signature, timestamp, nonce)
     msg = parse_message(decrypted)
 
-    dispatch = MsgDispatcher(BaseReplyLoader())
+    dispatcher = MsgDispatcher(BaseReplyLoader())
     answer = dispatch.dispatch(msg)
 
     reply = create_reply(answer, message=msg, render=True)
