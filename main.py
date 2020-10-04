@@ -3,8 +3,9 @@ from fastapi.responses import PlainTextResponse
 from environs import Env
 from fastapi.middleware.cors import CORSMiddleware
 from typing import Optional
-from wechatpy.utils import check_signature
 from wechatpy import parse_message
+from wechatpy.utils import check_signature
+from wechatpy.replies import TextReply, create_reply
 from wechatpy.exceptions import InvalidSignatureException
 from wechatpy.crypto import WeChatCrypto
 import hashlib
@@ -78,5 +79,6 @@ async def reply_handler(
     else:
         result = '收到不支持的消息'
 
-    print(result)
-    return result
+    reply = create_reply(result, message=msg, render=True)
+    encrypted = crypto.encrypt_message(reply, nonce)
+    return encrypted
