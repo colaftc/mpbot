@@ -8,6 +8,7 @@ from wechatpy.utils import check_signature
 from wechatpy.replies import TextReply, create_reply
 from wechatpy.exceptions import InvalidSignatureException
 from wechatpy.crypto import WeChatCrypto
+from collections import namedtuple
 import hashlib
 
 app = FastAPI()
@@ -44,6 +45,43 @@ crypto = WeChatCrypto(
     app_id=config['MP_SETTINGS']['APPID'],
 )
 
+Reply = namedtuple('Reply', ['question', 'answer'])
+
+class BaseReplyLoader:
+    def __init__(self):
+        self.replies = self._load()
+
+    def _load(self):
+        return [
+            Reply('热茶屯是什么？', '热茶屯是茶行业新模式，品牌商直接发货，没有金字塔经销体系中间商，全国统一批发价'),
+            Reply('热茶屯安全吗？', '热茶屯保证您的资金安全，收益安全，货品质量安全，知识产权安全，税务法规安全'),
+            Reply('人工客服', '在线客服功能维护中，请致电400-688-6888咨询'),
+        ]
+
+    def get_question_list(self):
+        return [r.question for r in self.replies]
+
+    def default_reply(self, sep : str = '\n'):
+        answer = reduce(lambda r : f'{r.question}{sep} ', self.get_question_list())
+        return f'小屯暂不支持此类消息喔，请使用数字或文字咨询{sep}{answer}'
+
+    def answer(self, question : str):
+        result = [r for r in self.replies if r.question == question]
+        if len(result) == 1:
+            return result[0].answer
+        return Reply('暂不支持此类消息', f'小屯暂不支持此类消息喔，请使用数字或文字咨询\n{self.default_reply}')
+
+class MsgDispatcher:
+    def __init__(self, loader : BaseReplyLoader):
+        self._loader = loader
+
+    def dispatch(msg):
+        if msg.type == 'text':
+            return self._loader.answer(msg.content)
+        else:
+            return self.loader.answer()
+
+
 @app.get('/', response_class=PlainTextResponse)
 async def wx_verify(
    signature : str,
@@ -72,13 +110,9 @@ async def reply_handler(
     decrypted = crypto.decrypt_message(xml_body.decode(), msg_signature, timestamp, nonce)
     msg = parse_message(decrypted)
 
-    if msg.type == 'text':
-        result = '收到文字消息'
-    elif msg.type == 'image':
-        result = '收到图片消息'
-    else:
-        result = '收到不支持的消息'
+    dispatch = MsgDispatcher(BaseReplyLoader())
+    answer = dispatch.dispatch(msg)
 
-    reply = create_reply(result, message=msg, render=True)
+    reply = create_reply(answer, message=msg, render=True)
     encrypted = crypto.encrypt_message(reply, nonce)
     return Response(encrypted, media_type='application/xml')
