@@ -78,4 +78,5 @@ async def reply_handler(
     else:
         result = '收到不支持的消息'
 
+    print(result)
     return result
