@@ -1,4 +1,5 @@
 from fastapi import FastAPI
+from fastapi.responses import PlainTextResponse
 from environs import Env
 from fastapi.middleware.cors import CORSMiddleware
 from typing import Optional
@@ -33,7 +34,7 @@ app.add_middleware(
     allow_headers=['*'],
 )
 
-@app.get('/wx-verify')
+@app.get('/wx-verify', response_class=PlainTextResponse)
 async def wx_verify(
    signature : str,
    nonce : str,
