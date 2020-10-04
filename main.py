@@ -1,4 +1,5 @@
 from fastapi import FastAPI
+from environs import Env
 from fastapi.middleware.cors import CORSMiddleware
 from typing import Optional
 from wechatpy import WeChatClient
@@ -6,10 +7,14 @@ import hashlib
 
 app = FastAPI()
 
+# load the .env file, if exists
+env = Env()
+env.read_env()
+
 config = {
-    'MP' : {
-        'TOKEN' : 'gzgg486180401',
-        'EncodingAESKey' : 'Jyf2plzPp3BNC5B55o0dXb10nY2qmb58QplUt8a9vRn',
+    'MP_SETTINGS' : {
+        'TOKEN' : env.str('MPBOT_TOKEN'),
+        'EncodingAESKey' : env.str('MPBOT_ENCODING_AESKEY'),
     },
 }
 
