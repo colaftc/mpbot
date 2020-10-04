@@ -63,7 +63,7 @@ class BaseReplyLoader:
         return [r.question for r in self.replies]
 
     def default_reply(self, sep : str = '\n'):
-        answer = reduce(lambda r : f'{r.question}{sep} ', self.get_question_list())
+        answer = reduce(lambda c, n : f'{c.question}{sep}{n.question}', self.get_question_list())
         return f'小屯暂不支持此类消息喔，请使用数字或文字咨询{sep}{answer}'
 
     def answer(self, question : str):
