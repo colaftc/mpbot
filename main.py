@@ -69,7 +69,7 @@ class BaseReplyLoader:
         result = [r for r in self.replies if r.question == question]
         if len(result) == 1:
             return result[0].answer
-        return Reply('暂不支持此类消息', f'小屯暂不支持此类消息喔，请使用数字或文字咨询\n{self.default_reply}')
+        return self.default_reply()
 
 class MsgDispatcher:
     def __init__(self, loader : BaseReplyLoader):
@@ -79,8 +79,7 @@ class MsgDispatcher:
         if msg.type == 'text':
             return self._loader.answer(msg.content)
         else:
-            return self.loader.answer()
-
+            return self._loader.answer()
 
 @app.get('/', response_class=PlainTextResponse)
 async def wx_verify(
@@ -111,7 +110,7 @@ async def reply_handler(
     msg = parse_message(decrypted)
 
     dispatcher = MsgDispatcher(BaseReplyLoader())
-    answer = dispatch.dispatch(msg)
+    answer = dispatcher.dispatch(msg)
 
     reply = create_reply(answer, message=msg, render=True)
     encrypted = crypto.encrypt_message(reply, nonce)
