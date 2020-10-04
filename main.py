@@ -68,4 +68,6 @@ async def reply_handler(
 ):
     xml_body = await request.body()
     msg = crypto.decrypt_message(xml_body.decode(), msg_signature, timestamp, nonce)
+
+    print(msg)
     return {'msg' : 'testing'}
