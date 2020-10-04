@@ -1,5 +1,5 @@
 from fastapi import FastAPI, Body, Request
-from fastapi.responses import PlainTextResponse
+from fastapi.responses import PlainTextResponse, Response
 from environs import Env
 from fastapi.middleware.cors import CORSMiddleware
 from typing import Optional
@@ -61,7 +61,7 @@ async def wx_verify(
     print([signature, nonce, timestamp, echostr])
     return echostr
 
-@app.post('/')
+@app.post('/', response_class=Xml)
 async def reply_handler(
     msg_signature : str,
     timestamp : str,
@@ -81,4 +81,4 @@ async def reply_handler(
 
     reply = create_reply(result, message=msg, render=True)
     encrypted = crypto.encrypt_message(reply, nonce)
-    return encrypted
+    return Response(encrypted, media_type='application/xml')
