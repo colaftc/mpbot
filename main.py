@@ -9,6 +9,7 @@ from wechatpy.replies import TextReply, create_reply
 from wechatpy.exceptions import InvalidSignatureException
 from wechatpy.crypto import WeChatCrypto
 from collections import namedtuple
+from functools import reduce
 import hashlib
 
 app = FastAPI()
