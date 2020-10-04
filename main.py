@@ -34,7 +34,7 @@ app.add_middleware(
     allow_headers=['*'],
 )
 
-@app.get('/wx-verify', response_class=PlainTextResponse)
+@app.get('/', response_class=PlainTextResponse)
 async def wx_verify(
    signature : str,
    nonce : str,
