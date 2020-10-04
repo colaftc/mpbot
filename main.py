@@ -14,7 +14,9 @@ env.read_env()
 config = {
     'MP_SETTINGS' : {
         'TOKEN' : env.str('MPBOT_TOKEN'),
-        'EncodingAESKey' : env.str('MPBOT_ENCODING_AESKEY'),
+        'AESKEY' : env.str('MPBOT_ENCODING_AESKEY'),
+        'APPID' : env.str('MPBOT_APPID'),
+        'SECRET' : env.str('MPBOT_SECRET'),
     },
 }
 
