@@ -2,7 +2,8 @@ from fastapi import FastAPI
 from environs import Env
 from fastapi.middleware.cors import CORSMiddleware
 from typing import Optional
-from wechatpy import WeChatClient
+from wechatpy.utils import check_signature
+from wechatpy.exceptions import InvalidSignatureException
 import hashlib
 
 app = FastAPI()
@@ -39,4 +40,11 @@ async def wx_verify(
    timestamp : str,
    echostr : str
 ):
-    return {'echostr' : echostr}
+    
+    print([signature, nonce, timestamp, echostr])
+    try:
+        check_signature(config['MP_SETTINGS']['TOKEN'], signature, timestamp, nonce)
+    except InvalidSignatureException:
+        return ''
+
+    return echostr
