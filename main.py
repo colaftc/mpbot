@@ -4,6 +4,7 @@ from environs import Env
 from fastapi.middleware.cors import CORSMiddleware
 from typing import Optional
 from wechatpy.utils import check_signature
+from wechatpy import parse_message
 from wechatpy.exceptions import InvalidSignatureException
 from wechatpy.crypto import WeChatCrypto
 import hashlib
@@ -67,8 +68,7 @@ async def reply_handler(
     request : Request,
 ):
     xml_body = await request.body()
-    msg = crypto.decrypt_message(xml_body.decode(), msg_signature, timestamp, nonce)
-
+    decrypted = crypto.decrypt_message(xml_body.decode(), msg_signature, timestamp, nonce)
+    msg = parse_message(decrypted)
     print(msg)
-
     return {'msg' : 'testing'}
