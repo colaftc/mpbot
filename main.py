@@ -41,10 +41,11 @@ async def wx_verify(
    echostr : str
 ):
     
-    print([signature, nonce, timestamp, echostr])
     try:
         check_signature(config['MP_SETTINGS']['TOKEN'], signature, timestamp, nonce)
     except InvalidSignatureException:
+        print('verify failed')
         return ''
 
+    print([signature, nonce, timestamp, echostr])
     return echostr
