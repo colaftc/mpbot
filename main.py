@@ -42,10 +42,9 @@ app.add_middleware(
 register_tortoise(
     app,
     db_url=config['MP_SETTINGS']['DB'],
-    generate_schemas=False,
+    generate_schemas=True,
     add_exception_handlers=True,
     modules={'models' : ['models', ]},
-    generate_schemas=True,
 )
 
 # initial crypto for mp message
