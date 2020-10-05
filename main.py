@@ -119,7 +119,7 @@ async def reply_handler(
     msg = parse_message(decrypted)
 
     # put msg in db
-    MPMessage.create(publisher=msg.fromUserName, content=msg.content)
+    MPMessage.create(publisher=msg.source, content=msg.content)
 
     dispatcher = MsgDispatcher(BaseReplyLoader())
     answer = dispatcher.dispatch(msg)
