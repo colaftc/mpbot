@@ -45,6 +45,7 @@ register_tortoise(
     generate_schemas=False,
     add_exception_handlers=True,
     modules={'models' : ['models', ]},
+    generate_schemas=True,
 )
 
 # initial crypto for mp message
