@@ -42,6 +42,7 @@ app.add_middleware(
 register_tortoise(
     app,
     db_url=config['MP_SETTINGS']['DB'],
+    # create table
     generate_schemas=True,
     add_exception_handlers=True,
     modules={'models' : ['models', ]},
