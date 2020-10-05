@@ -1,8 +1,10 @@
+# pylint: disable=E0611
+
 from fastapi import FastAPI, Body, Request
 from fastapi.responses import PlainTextResponse, Response
 from environs import Env
 from fastapi.middleware.cors import CORSMiddleware
-from typing import Optional
+from typing import Optional, Dict
 from wechatpy import parse_message
 from wechatpy.utils import check_signature
 from wechatpy.replies import TextReply, create_reply
@@ -10,33 +12,39 @@ from wechatpy.exceptions import InvalidSignatureException
 from wechatpy.crypto import WeChatCrypto
 from collections import namedtuple
 from functools import reduce
+from tortoise.contrib.fastapi import HTTPNotFoundError, register_tortoise
+from models import MPMessage, MPMessage_Pydantic
 import hashlib
-
-app = FastAPI()
 
 # load the .env file, if exists
 env = Env()
 env.read_env()
 
-config = {
+config : Dict[str, any] = {
     'MP_SETTINGS' : {
         'TOKEN' : env.str('MPBOT_TOKEN'),
         'AESKEY' : env.str('MPBOT_ENCODING_AESKEY'),
         'APPID' : env.str('MPBOT_APPID'),
         'SECRET' : env.str('MPBOT_SECRET'),
+        'DB' : env.str('MPBOT_DB_URI'),
     },
 }
 
-origins = [
-    '*',
-]
-
+app = FastAPI(title='Wechat MP platform message auto replier')
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=origins,
+    allow_origins=['*'],
     allow_credentials=True,
     allow_methods=['*'],
     allow_headers=['*'],
+)
+
+register_tortoise(
+    app,
+    db_url=config['MP_SETTINGS']['DB'],
+    generate_schemas=False,
+    add_exception_handlers=True,
+    modules={'models' : ['models', ]},
 )
 
 # initial crypto for mp message
@@ -109,6 +117,9 @@ async def reply_handler(
     xml_body = await request.body()
     decrypted = crypto.decrypt_message(xml_body.decode(), msg_signature, timestamp, nonce)
     msg = parse_message(decrypted)
+
+    # put msg in db
+    MPMessage.create(publisher=msg.fromUserName, content=msg.content)
 
     dispatcher = MsgDispatcher(BaseReplyLoader())
     answer = dispatcher.dispatch(msg)
