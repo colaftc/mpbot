@@ -64,8 +64,8 @@ class BaseReplyLoader:
     def _load(self):
         return [
             Reply('热茶屯是什么？', '热茶屯是茶行业新模式，品牌商直接发货，没有金字塔经销体系中间商，全国统一批发价'),
-            Reply('热茶屯安全吗？', '热茶屯保证您的资金安全，收益安全，货品质量安全，知识产权安全，税务法规安全'),
-            Reply('人工客服', '在线客服功能维护中，请致电400-688-6888咨询'),
+            # Reply('热茶屯安全吗？', '热茶屯保证您的资金安全，收益安全，货品质量安全，知识产权安全，税务法规安全'),
+            Reply('人工客服', '在线客服功能维护中，请致电400-608-1929咨询'),
         ]
 
     def get_question_list(self):
@@ -81,13 +81,19 @@ class BaseReplyLoader:
             return result[0].answer
         return self.default_reply()
 
+def _default_evt_handler(evt):
+    print(evt)
+
 class MsgDispatcher:
-    def __init__(self, loader : BaseReplyLoader):
+    def __init__(self, loader : BaseReplyLoader, event_handler : callable = _default_evt_handler):
         self._loader = loader
+        self._event_handler = event_handler
 
     def dispatch(self, msg):
         if msg.type == 'text':
             return self._loader.answer(msg.content)
+        if msg.type == 'event':
+            return self._event_handler(msg)
         else:
             return self._loader.answer()
 
