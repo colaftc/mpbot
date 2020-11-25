@@ -30,6 +30,7 @@ config : Dict[str, any] = {
     },
 }
 
+API_URL = 'https://www.rechatun.com'
 app = FastAPI(title='Wechat MP platform message auto replier')
 app.add_middleware(
     CORSMiddleware,
@@ -57,11 +58,25 @@ crypto = WeChatCrypto(
 
 Reply = namedtuple('Reply', ['question', 'answer'])
 
-def get_agent_infi(openid : str):
-    pass
+def get_user_info(openid : str):
+    url = API_URL + '/api/openid2user/'
+    res = requests.post(url, {
+        'openid' : openid,
+    })
+    print(f'[获取推荐人信息] : {res.json()}')
+    return res
 
-def markup_agent(agent_uid : int):
-    pass
+def markup_agent(agent_uid : str, agent_unionid : str, customer_id: str, customer_unionid : str):
+    url = API_URL + '/agent/promotion'
+    res = requests.post(url, json={
+        'agent_uid' : agent_uid,
+        'agent_unionid' : agent_unionid,
+        'customer_id' : customer_id,
+        'customer_unionid' : customer_unionid,
+        'lock' : False
+    })
+    print(f'[记录推荐行为] : {res.json()}')
+    return res
 
 class BaseReplyLoader:
     def __init__(self):
@@ -91,6 +106,10 @@ def _default_evt_handler(evt):
     print(f'[事件] : {evt}')
     if evt.event == 'subscribe_scan':
         print(f'[未关注用户扫码关注事件] : 场景值"{evt.scene_id}"')
+        params = evt.scene_id.split('&')
+        params = map(lambda v: {'k':v[0], 'v':v[1]}, params)
+        print(f'[SCENE_PARAM_PARSE] : {params}')
+        # agent_user = get_user_info()
 
 class MsgDispatcher:
     def __init__(self, loader : BaseReplyLoader, event_handler : callable = _default_evt_handler):
@@ -143,3 +162,15 @@ async def reply_handler(
     reply = create_reply(answer, message=msg, render=True)
     encrypted = crypto.encrypt_message(reply, nonce)
     return Response(encrypted, media_type='application/xml')
+
+# @app.post('/testing')
+# async def testing(request : Request):
+#     real_openid = 'o7OPz5NdjQFmShx_g2tcVAmlhZsU'
+#     agent_openid = 'o7OPz5EdwMjpPlaw0IyNNNBaBd8g'
+#     res = get_user_info(real_openid)
+#     agent_res = get_user_info(agent_openid)
+#     assert res.status_code == agent_res.status_code == 200
+#     res = res.json()
+#     agent_res = agent_res.json()
+#     promo_res = markup_agent(agent_uid=agent_res['uid'], agent_unionid=agent_res['unionid'], customer_id=res['id'], customer_unionid=res['unionid'])
+#     return promo_res.status_code

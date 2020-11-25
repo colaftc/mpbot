@@ -1,5 +1,5 @@
 from typing import Generator
-from main import app
+from main import app, get_user_info, markup_agent
 from models import MPMessage
 from fastapi.testclient import TestClient
 from tortoise.contrib.test import finalizer, initializer
@@ -41,3 +41,11 @@ def test_create_message(client : TestClient, event_loop : asyncio.AbstractEventL
     # msg = await MPMessage_Pydantic.from_tortoise_orm(msg)
     # assert msg.id > 0
     # assert len(msg.content) > 10
+
+def test_get_agent_info(client : TestClient, event_loop : asyncio.AbstractEventLoop):
+    real_openid = 'o7OPz5NdjQFmShx_g2tcVAmlhZsU'
+    agent_openid = 'o7OPz5EdwMjpPlaw0IyNNNBaBd8g'
+    res = get_user_info(real_openid)
+    agent_res = get_user_info(agent_openid)
+    assert res.status_code == 200
+    assert res['username'] == real_openid
