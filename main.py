@@ -14,7 +14,7 @@ from collections import namedtuple
 from functools import reduce
 from tortoise.contrib.fastapi import HTTPNotFoundError, register_tortoise
 from models import MPMessage, MPMessage_Pydantic
-import hashlib
+import hashlib, requests
 
 # load the .env file, if exists
 env = Env()
@@ -57,6 +57,12 @@ crypto = WeChatCrypto(
 
 Reply = namedtuple('Reply', ['question', 'answer'])
 
+def get_agent_infi(openid : str):
+    pass
+
+def markup_agent(agent_uid : int):
+    pass
+
 class BaseReplyLoader:
     def __init__(self):
         self.replies = self._load()
@@ -82,15 +88,19 @@ class BaseReplyLoader:
         return self.default_reply()
 
 def _default_evt_handler(evt):
-    print(evt)
+    print(f'[事件] : {evt}')
+    if evt.event == 'subscribe_scan':
+        print(f'[未关注用户扫码关注事件] : 场景值"{evt.scene_id}"')
 
 class MsgDispatcher:
     def __init__(self, loader : BaseReplyLoader, event_handler : callable = _default_evt_handler):
         self._loader = loader
         self._event_handler = event_handler
 
-    def dispatch(self, msg):
+    async def dispatch(self, msg):
         if msg.type == 'text':
+            # put msg in db
+            await MPMessage.create(publisher=msg.source, content=msg.content)
             return self._loader.answer(msg.content)
         if msg.type == 'event':
             return self._event_handler(msg)
@@ -125,11 +135,10 @@ async def reply_handler(
     decrypted = crypto.decrypt_message(xml_body.decode(), msg_signature, timestamp, nonce)
     msg = parse_message(decrypted)
 
-    # put msg in db
-    await MPMessage.create(publisher=msg.source, content=msg.content)
-
     dispatcher = MsgDispatcher(BaseReplyLoader())
-    answer = dispatcher.dispatch(msg)
+
+
+    answer = await dispatcher.dispatch(msg)
 
     reply = create_reply(answer, message=msg, render=True)
     encrypted = crypto.encrypt_message(reply, nonce)
