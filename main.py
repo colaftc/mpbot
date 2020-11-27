@@ -102,14 +102,57 @@ class BaseReplyLoader:
             return result[0].answer
         return self.default_reply()
 
+def check_agent(a, q):
+    url = API_URL + '/api/check-agent/'
+    res = requests.post(url, data={
+        'a' : a,
+        'q' : q,
+    })
+    print(f'[验证推广状态] : {res}')
+    if res.status_code == 200:
+        return res.json()
+    return None
+
+def get_user_by_openid(openid):
+    url = API_URL + '/wx/openid2unionid/'
+    res = requests.post(url, data={
+        'openid' : openid,
+    })
+    print(f'[获取用户] : {res}')
+    if res.status_code == 200:
+        return res.json()
+    return None
+
 def _default_evt_handler(evt):
     print(f'[事件] : {evt}')
     if evt.event == 'subscribe_scan':
         print(f'[未关注用户扫码关注事件] : 场景值"{evt.scene_id}"')
         params = evt.scene_id.split('&')
-        params = map(lambda v: {'k':v[0], 'v':v[1]}, params)
+        params = list(map(lambda v: v[1] ,map(lambda v : v.split('='), params)))
         print(f'[SCENE_PARAM_PARSE] : {params}')
-        # agent_user = get_user_info()
+        agent = check_agent(params[0], params[1])
+
+        if not agent:
+            return False
+        
+        print(f'[推广者验证有效] : {agent["uid"]}')
+        if agent['id'] == 5197:
+            # 5197例外处理
+            agent['openid'] = 'super-admin-agent'
+            agent['unionid'] = 'super-admin-agent'
+            print(f'[被推荐客户ID] : {evt.source}')
+            
+        # openid to unionid
+        customer = get_user_by_openid(evt.source)
+
+        print(f'[被推荐客户UNIONID] : {customer["user"]["unionid"]}')
+        result = markup_agent(
+            agent_uid=agent['uid'],
+            agent_unionid=agent['unionid'],
+            customer_id=customer['user']['id'],
+            customer_unionid=customer['user']['unionid'],
+        )
+        print(f'[处理结果] : {result}')
 
 class MsgDispatcher:
     def __init__(self, loader : BaseReplyLoader, event_handler : callable = _default_evt_handler):
