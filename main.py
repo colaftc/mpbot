@@ -13,7 +13,7 @@ from wechatpy.crypto import WeChatCrypto
 from collections import namedtuple
 from functools import reduce
 from tortoise.contrib.fastapi import HTTPNotFoundError, register_tortoise
-from models import MPMessage, MPMessage_Pydantic
+from models import MPMessage, MPMessage_Pydantic, MPEvent, MPEvent_Pydantic
 import hashlib, requests
 
 # load the .env file, if exists
@@ -123,10 +123,13 @@ def get_user_by_openid(openid):
         return res.json()
     return None
 
-def _default_evt_handler(evt):
+async def _default_evt_handler(evt):
     print(f'[事件] : {evt}')
+    e = await MPEvent.create(from_user=evt.source, evt=evt.event)
     if evt.event == 'subscribe_scan':
         print(f'[未关注用户扫码关注事件] : 场景值"{evt.scene_id}"')
+        e.extra = evt.scene_id
+        e.save()
         params = evt.scene_id.split('&')
         params = list(map(lambda v: v[1] ,map(lambda v : v.split('='), params)))
         print(f'[SCENE_PARAM_PARSE] : {params}')
@@ -143,7 +146,11 @@ def _default_evt_handler(evt):
             print(f'[被推荐客户ID] : {evt.source}')
             
         # openid to unionid
-        customer = get_user_by_openid(evt.source)
+        try:
+            customer = get_user_by_openid(evt.source)
+        except:
+            # 失败再重复一次
+            customer = get_user_by_openid(evt.source)
 
         print(f'[被推荐客户UNIONID] : {customer["user"]["unionid"]}')
         result = markup_agent(
