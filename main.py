@@ -172,7 +172,7 @@ class MsgDispatcher:
             await MPMessage.create(publisher=msg.source, content=msg.content)
             return self._loader.answer(msg.content)
         if msg.type == 'event':
-            return self._event_handler(msg)
+            return await self._event_handler(msg)
         else:
             return self._loader.answer()
 
