@@ -129,7 +129,8 @@ async def _default_evt_handler(evt):
     if evt.event == 'subscribe_scan':
         print(f'[未关注用户扫码关注事件] : 场景值"{evt.scene_id}"')
         e.extra = evt.scene_id
-        e.save()
+        print(e.extra)
+        await e.save()
         params = evt.scene_id.split('&')
         params = list(map(lambda v: v[1] ,map(lambda v : v.split('='), params)))
         print(f'[SCENE_PARAM_PARSE] : {params}')
