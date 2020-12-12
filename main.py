@@ -59,7 +59,7 @@ crypto = WeChatCrypto(
 Reply = namedtuple('Reply', ['question', 'answer'])
 
 def get_user_info(openid : str):
-    url = API_URL + '/api/openid2user/'
+    url = API_URL + '/api/mp-unionid/'
     res = requests.post(url, {
         'openid' : openid,
     })
@@ -113,8 +113,8 @@ def check_agent(a, q):
         return res.json()
     return None
 
-def get_user_by_openid(openid):
-    url = API_URL + '/wx/openid2unionid/'
+def openid_to_unionid(openid):
+    url = API_URL + '/wx/mp-unionid/'
     res = requests.post(url, data={
         'openid' : openid,
     })
@@ -147,18 +147,17 @@ async def _default_evt_handler(evt):
             print(f'[被推荐客户ID] : {evt.source}')
             
         # openid to unionid
-        try:
-            customer = get_user_by_openid(evt.source)
-        except:
-            # 失败再重复一次
-            customer = get_user_by_openid(evt.source)
+        customer = openid_to_unionid(evt.source)
+        print(f'[返回数据]{customer}')
+        if customer.get('unionid', '') == '':
+            raise Exception('无法获取unionid')
 
-        print(f'[被推荐客户UNIONID] : {customer["user"]["unionid"]}')
+        print(f'[被推荐客户UNIONID] : {customer["unionid"]}')
         result = markup_agent(
             agent_uid=agent['uid'],
             agent_unionid=agent['unionid'],
-            customer_id=customer['user']['id'],
-            customer_unionid=customer['user']['unionid'],
+            customer_id=0,
+            customer_unionid=customer['unionid'],
         )
         print(f'[处理结果] : {result}')
 
