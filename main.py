@@ -213,6 +213,16 @@ async def reply_handler(
     encrypted = crypto.encrypt_message(reply, nonce)
     return Response(encrypted, media_type='application/xml')
 
+@app.get('/events/')
+async def event_list(request : Request):
+    openid = request.query_params.get('openid', '')
+    if not openid:
+        res = await MPEvent.filter().order_by('-created_at')
+    else:
+        res = await MPEvent.filter(openid=openid).order_by('-created_at')
+
+    return res
+
 # @app.post('/testing')
 # async def testing(request : Request):
 #     real_openid = 'o7OPz5NdjQFmShx_g2tcVAmlhZsU'
