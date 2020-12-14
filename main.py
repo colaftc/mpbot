@@ -216,12 +216,18 @@ async def reply_handler(
 @app.get('/events/')
 async def event_list(request : Request):
     openid = request.query_params.get('openid', '')
-    if not openid:
-        res = await MPEvent.filter().order_by('-created_at')
-    else:
-        res = await MPEvent.filter(openid=openid).order_by('-created_at')
+    evt = request.query_params.get('event', '')
 
-    return res
+    if not openid:
+        if not evt:
+            return await MPEvent.filter().order_by('-created_at')
+        else:
+            return await MPEvent.filter(evt=evt).order_by('-created_at')
+    else:
+        if not evt:
+            return await MPEvent.filter(from_user=openid).order_by('-created_at')
+        else:
+            return await MPEvent.filter(from_user=openid).filter(evt=evt).order_by('-created_at')
 
 # @app.post('/testing')
 # async def testing(request : Request):
