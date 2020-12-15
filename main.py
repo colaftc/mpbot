@@ -113,10 +113,11 @@ def check_agent(a, q):
         return res.json()
     return None
 
-def openid_to_unionid(openid):
+def openid_to_unionid(openid, extra=''):
     url = API_URL + '/wx/mp-unionid/'
     res = requests.post(url, data={
         'openid' : openid,
+        'extra' : extra,
     })
     print(f'[获取用户] : {res}')
     if res.status_code == 200:
@@ -147,7 +148,7 @@ async def _default_evt_handler(evt):
             print(f'[被推荐客户ID] : {evt.source}')
             
         # openid to unionid
-        customer = openid_to_unionid(evt.source)
+        customer = openid_to_unionid(evt.source, evt.scene_id)
         print(f'[返回数据]{customer}')
         if customer.get('unionid', '') == '':
             raise Exception('无法获取unionid')
