@@ -115,6 +115,8 @@ def check_agent(a, q):
 
 def openid_to_unionid(openid, extra=''):
     url = API_URL + '/wx/mp-unionid/'
+    if extra != '':
+        print(f'[带场景值转换unionid] : {extra}')
     res = requests.post(url, data={
         'openid' : openid,
         'extra' : extra,
