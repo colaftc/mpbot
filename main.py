@@ -129,7 +129,7 @@ def openid_to_unionid(openid, extra=''):
 async def _default_evt_handler(evt):
     print(f'[事件] : {evt}')
     e = await MPEvent.create(from_user=evt.source, evt=evt.event)
-    if evt.event == 'subscribe_scan':
+    if evt.event == 'subscribe_scan' or evt.event == 'scan':
         print(f'[未关注用户扫码关注事件] : 场景值"{evt.scene_id}"')
         e.extra = evt.scene_id
         print(e.extra)
