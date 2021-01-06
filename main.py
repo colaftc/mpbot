@@ -130,6 +130,7 @@ def openid_to_unionid(openid, extra=''):
 def send_miniapp(openid):
     url = API_URL + '/wx/send-miniapp/'
     res = requests.post(url, data={
+        'secret': 'ggadmin5197',
         'openid': openid,
     })
     print(f'[发送结果] : {res}')
