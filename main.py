@@ -171,6 +171,7 @@ async def _default_evt_handler(evt):
         tag_user_result = tag_user(evt.source)
 
         print(f'[返回数据]{customer}')
+        print(f'[返回数据]{tag_user_result}')
         if customer.get('unionid', '') == '':
             raise Exception('无法获取unionid')
 
