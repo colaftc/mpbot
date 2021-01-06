@@ -126,6 +126,21 @@ def openid_to_unionid(openid, extra=''):
         return res.json()
     return None
 
+
+def tag_user(openid, tag_id=100):
+    url = API_URL + '/wx/tag-user/'
+    print(f'[新关注用户自动打标签] : {openid}')
+    res = requests.get(API_URL + '/wx/mp-unionid/', data={
+        'secret': 'ggadmin5197',
+        'openid': openid,
+        'tag_id': tag_id,
+    })
+    print(f'[用户打标结果] : {res}')
+    if res.status_code == 200:
+        return res.json()
+    return None
+
+
 async def _default_evt_handler(evt):
     print(f'[事件] : {evt}')
     e = await MPEvent.create(from_user=evt.source, evt=evt.event)
@@ -151,6 +166,10 @@ async def _default_evt_handler(evt):
             
         # openid to unionid
         customer = openid_to_unionid(evt.source, evt.scene_id)
+
+        # tag user when subscribe
+        tag_user_result = tag_user(evt.source)
+
         print(f'[返回数据]{customer}')
         if customer.get('unionid', '') == '':
             raise Exception('无法获取unionid')
