@@ -145,13 +145,13 @@ async def _default_evt_handler(evt):
     print(f'[事件] : {evt}')
     print(f'[事件类型] : "{evt.event}"')
     e = await MPEvent.create(from_user=evt.source, evt=evt.event)
-    if evt.event == 'subscribe_scan' or evt.event == 'scan':
+    if evt.event == 'subscribe_scan' or evt.event == 'subscribe':
         print(f'[未关注用户扫码关注事件] : 场景值"{evt.scene_id}"')
         e.extra = evt.scene_id
         print(e.extra)
         await e.save()
         params = evt.scene_id.split('&')
-        params = list(map(lambda v: v[1] ,map(lambda v : v.split('='), params)))
+        params = list(map(lambda v: v[1], map(lambda v : v.split('='), params)))
         print(f'[SCENE_PARAM_PARSE] : {params}')
         agent = check_agent(params[0], params[1])
 
