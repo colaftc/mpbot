@@ -141,6 +141,10 @@ def tag_user(openid, tag_id=100):
     return None
 
 
+def welcome_message(openid):
+    d
+
+
 async def _default_evt_handler(evt):
     print(f'[事件] : {evt}')
     print(f'[事件类型] : "{evt.event}"')
@@ -188,10 +192,13 @@ async def _default_evt_handler(evt):
         # tag user when subscribe
         tag_user_result = tag_user(evt.source)
         print(f'[打标返回数据]{tag_user_result}')
+        return '欢迎您大驾光临热茶屯[玫瑰] ，热茶屯专业茶叶品牌批发 不卖单独消费者。\
+        新模式 1.厂家直供就是便宜，从源头正规厂家直发茶店 2.分享式经济 介绍其他茶店到平台购买可获得永久反佣。\
+        3.不定期大促活动 为茶店谋福利。    期待与您共同开拓未来[微笑]'
 
 
 class MsgDispatcher:
-    def __init__(self, loader : BaseReplyLoader, event_handler : callable = _default_evt_handler):
+    def __init__(self, loader: BaseReplyLoader, event_handler: callable = _default_evt_handler):
         self._loader = loader
         self._event_handler = event_handler
 
@@ -207,10 +214,10 @@ class MsgDispatcher:
 
 @app.get('/', response_class=PlainTextResponse)
 async def wx_verify(
-   signature : str,
-   nonce : str,
-   timestamp : str,
-   echostr : str
+   signature: str,
+   nonce: str,
+   timestamp: str,
+   echostr: str
 ):
     
     try:
@@ -224,10 +231,10 @@ async def wx_verify(
 
 @app.post('/')
 async def reply_handler(
-    msg_signature : str,
-    timestamp : str,
-    nonce : str,
-    request : Request,
+    msg_signature: str,
+    timestamp: str,
+    nonce: str,
+    request: Request,
 ):
     xml_body = await request.body()
     decrypted = crypto.decrypt_message(xml_body.decode(), msg_signature, timestamp, nonce)
