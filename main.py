@@ -141,10 +141,6 @@ def tag_user(openid, tag_id=100):
     return None
 
 
-def welcome_message(openid):
-    d
-
-
 async def _default_evt_handler(evt):
     print(f'[事件] : {evt}')
     print(f'[事件类型] : "{evt.event}"')
@@ -172,8 +168,6 @@ async def _default_evt_handler(evt):
 
             # openid to unionid
             customer = openid_to_unionid(evt.source, evt.scene_id)
-
-
             print(f'[返回数据]{customer}')
             if customer.get('unionid', '') == '':
                 raise Exception('无法获取unionid')
@@ -192,9 +186,7 @@ async def _default_evt_handler(evt):
         # tag user when subscribe
         tag_user_result = tag_user(evt.source)
         print(f'[打标返回数据]{tag_user_result}')
-        return '欢迎您大驾光临热茶屯[玫瑰] ，热茶屯专业茶叶品牌批发 不卖单独消费者。\
-        新模式 1.厂家直供就是便宜，从源头正规厂家直发茶店 2.分享式经济 介绍其他茶店到平台购买可获得永久反佣。\
-        3.不定期大促活动 为茶店谋福利。    期待与您共同开拓未来[微笑]'
+        return '''欢迎您大驾光临热茶屯[玫瑰] ，热茶屯专业茶叶品牌批发 不卖单独消费者。\n\n 热茶屯新模式 : \n\n 1.厂家直供就是便宜，从源头正规厂家直发茶店 \n\n 2.分享式经济 介绍其他茶店到平台购买可获得永久反佣。\n\n 3.不定期大促活动 为茶店谋福利。\n\n期待与您共同开拓未来[微笑]'''
 
 
 class MsgDispatcher:
