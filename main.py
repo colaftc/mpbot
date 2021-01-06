@@ -146,44 +146,49 @@ async def _default_evt_handler(evt):
     print(f'[事件类型] : "{evt.event}"')
     e = await MPEvent.create(from_user=evt.source, evt=evt.event)
     if evt.event == 'subscribe_scan' or evt.event == 'subscribe':
-        print(f'[未关注用户扫码关注事件] : 场景值"{evt.scene_id}"')
-        e.extra = evt.scene_id
-        print(e.extra)
-        await e.save()
-        params = evt.scene_id.split('&')
-        params = list(map(lambda v: v[1], map(lambda v : v.split('='), params)))
-        print(f'[SCENE_PARAM_PARSE] : {params}')
-        agent = check_agent(params[0], params[1])
+        try:
+            print(f'[未关注用户扫码关注事件] : 场景值"{evt.scene_id}"')
+            e.extra = evt.scene_id
+            print(e.extra)
+            await e.save()
+            params = evt.scene_id.split('&')
+            params = list(map(lambda v: v[1], map(lambda v: v.split('='), params)))
+            print(f'[SCENE_PARAM_PARSE] : {params}')
+            agent = check_agent(params[0], params[1])
 
-        if not agent:
-            return False
-        
-        print(f'[推广者验证有效] : {agent["uid"]}')
-        if agent['id'] == 5197:
-            # 5197例外处理
-            agent['openid'] = 'super-admin-agent'
-            agent['unionid'] = 'super-admin-agent'
-            print(f'[被推荐客户ID] : {evt.source}')
-            
-        # openid to unionid
-        customer = openid_to_unionid(evt.source, evt.scene_id)
+            if not agent:
+                return False
+
+            print(f'[推广者验证有效] : {agent["uid"]}')
+            if agent['id'] == 5197:
+                # 5197例外处理
+                agent['openid'] = 'super-admin-agent'
+                agent['unionid'] = 'super-admin-agent'
+                print(f'[被推荐客户ID] : {evt.source}')
+
+            # openid to unionid
+            customer = openid_to_unionid(evt.source, evt.scene_id)
+
+
+            print(f'[返回数据]{customer}')
+            if customer.get('unionid', '') == '':
+                raise Exception('无法获取unionid')
+
+            print(f'[被推荐客户UNIONID] : {customer["unionid"]}')
+            result = markup_agent(
+                agent_uid=agent['uid'],
+                agent_unionid=agent['unionid'],
+                customer_id=0,
+                customer_unionid=customer['unionid'],
+            )
+            print(f'[处理结果] : {result}')
+        except:
+            evt.scene_id = ''
 
         # tag user when subscribe
         tag_user_result = tag_user(evt.source)
+        print(f'[打标返回数据]{tag_user_result}')
 
-        print(f'[返回数据]{customer}')
-        print(f'[返回数据]{tag_user_result}')
-        if customer.get('unionid', '') == '':
-            raise Exception('无法获取unionid')
-
-        print(f'[被推荐客户UNIONID] : {customer["unionid"]}')
-        result = markup_agent(
-            agent_uid=agent['uid'],
-            agent_unionid=agent['unionid'],
-            customer_id=0,
-            customer_unionid=customer['unionid'],
-        )
-        print(f'[处理结果] : {result}')
 
 class MsgDispatcher:
     def __init__(self, loader : BaseReplyLoader, event_handler : callable = _default_evt_handler):
