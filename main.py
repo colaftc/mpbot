@@ -127,6 +127,17 @@ def openid_to_unionid(openid, extra=''):
     return None
 
 
+def send_miniapp(openid):
+    url = API_URL + '/wx/send-miniapp/'
+    res = requests.post(url, data={
+        'openid': openid,
+    })
+    print(f'[发送结果] : {res}')
+    if res.status_code == 200:
+        return res.json()
+    return None
+
+
 def tag_user(openid, tag_id=100):
     url = API_URL + '/wx/tag-user/'
     print(f'[新关注用户自动打标签] : {openid}')
@@ -186,6 +197,7 @@ async def _default_evt_handler(evt):
         # tag user when subscribe
         tag_user_result = tag_user(evt.source)
         print(f'[打标返回数据]{tag_user_result}')
+        send_miniapp(evt.source)
         return '''欢迎您大驾光临热茶屯[玫瑰] ，热茶屯专业茶叶品牌批发 不卖单独消费者。\n\n 热茶屯新模式 : \n\n 1.厂家直供就是便宜，从源头正规厂家直发茶店 \n\n 2.分享式经济 介绍其他茶店到平台购买可获得永久反佣。\n\n 3.不定期大促活动 为茶店谋福利。\n\n期待与您共同开拓未来[微笑]'''
 
 
