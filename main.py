@@ -130,7 +130,7 @@ def openid_to_unionid(openid, extra=''):
 def tag_user(openid, tag_id=100):
     url = API_URL + '/wx/tag-user/'
     print(f'[新关注用户自动打标签] : {openid}')
-    res = requests.get(API_URL + '/wx/mp-unionid/', data={
+    res = requests.get(API_URL + '/wx/tag-user/', data={
         'secret': 'ggadmin5197',
         'openid': openid,
         'tag_id': tag_id,
