@@ -146,6 +146,7 @@ async def _default_evt_handler(evt):
     e = await MPEvent.create(from_user=evt.source, evt=evt.event)
     if evt.event == 'subscribe_scan' or evt.event == 'scan':
         print(f'[未关注用户扫码关注事件] : 场景值"{evt.scene_id}"')
+        print(f'[事件类型] : "{evt.event}"')
         e.extra = evt.scene_id
         print(e.extra)
         await e.save()
